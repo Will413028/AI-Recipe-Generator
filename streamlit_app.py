@@ -7,12 +7,14 @@ import streamlit as st
 from PIL import Image
 
 
+api_key = st.secrets["OPENAI_API_KEY"]
+
 classNames = ['avocado', 'beans', 'beet', 'bell pepper', 'broccoli', 'brus capusta', 'cabbage', 'carrot', 'cayliflower', 'celery', 'corn', 'cucumber', 'eggplant', 'fasol', 'garlic', 'hot pepper', 'onion', 'peas', 'potato', 'pumpkin', 'rediska', 'redka', 'salad', 'squash-patisson', 'tomato', 'vegetable marrow']
 
 def process_image_and_generate_recipe(image_data):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    model = models.get('yolo_nas_s', num_classes=26, checkpoint_path='./vegetables_yolo_nas_small.pth').to(device)
+    model = models.get('yolo_nas_s', num_classes=26, checkpoint_path='./vegetable_yolo_nas.pth').to(device)
 
     np_image = np.array(image_data)
     frame = cv2.cvtColor(np_image, cv2.COLOR_RGB2BGR)
@@ -36,7 +38,7 @@ def process_image_and_generate_recipe(image_data):
 
 st.set_page_config(page_title="蔬食智能食譜", page_icon="📸")
 st.title("蔬食智能食譜")
-
+st.title(api_key)
 uploaded_file = st.file_uploader("請上傳一張照片或使用手機拍照", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:

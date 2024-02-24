@@ -5,7 +5,7 @@ import cv2
 from utils import load_model, process_image
 from config import OPENAI_API_KEY
 
-
+st.set_page_config(page_title="蔬食智能食譜", page_icon="📸")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 
@@ -32,22 +32,24 @@ def generate_recipe(ingredients, cuisine):
 
 
 def main():
-    st.set_page_config(page_title="蔬食智能食譜", page_icon="📸")
     st.title("蔬食智能食譜")
-    
+    with st.spinner('模型載入中，請稍候...'):
+        model = get_model()
+
     uploaded_file = st.file_uploader("請上傳一張照片或使用手機拍照", type=["jpg", "jpeg", "png"])
     cuisine = st.selectbox("選擇料理種類", ["台灣料理", "日本料理"])
-    st.title("您的食譜將在此生成")
-    
-    model = get_model()
-    
-    
+
+    if uploaded_file is None:
+        st.title("上傳照片後，您的食譜將在此生成")
+
     if uploaded_file is not None:
-        image = Image.open(uploaded_file)
-        st.image(image, width=300)
+        with st.spinner('圖片處理中...'):
+            image = Image.open(uploaded_file)
+            st.image(image, width=300)
+
         processed_image, ingredients_detected = process_image(image, model)
         processed_image = cv2.cvtColor(processed_image, cv2.COLOR_BGR2RGB)
-        
+
         if ingredients_detected:
             recipe = generate_recipe(ingredients_detected, cuisine)
             st.write(recipe)

@@ -6,17 +6,14 @@ import streamlit as st
 from PIL import Image
 from openai import OpenAI
 
+from config import OPENAI_API_KEY, CLASS_NAMES, MODEL_CHECKPOINT_PATH
 
-api_key = st.secrets["OPENAI_API_KEY"]
-
-classNames = ['avocado', 'beans', 'beet', 'bell pepper', 'broccoli', 'brus capusta', 'cabbage', 'carrot', 'cayliflower', 'celery', 'corn', 'cucumber', 'eggplant', 'fasol', 'garlic', 'hot pepper', 'onion', 'peas', 'potato', 'pumpkin', 'rediska', 'redka', 'salad', 'squash-patisson', 'tomato', 'vegetable marrow']
-
-client = OpenAI(api_key=api_key)
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 def process_image_and_generate_recipe(image_data):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    model = models.get('yolo_nas_s', num_classes=26, checkpoint_path='./vegetable_yolo_nas.pth').to(device)
+    model = models.get('yolo_nas_s', num_classes=26, checkpoint_path=MODEL_CHECKPOINT_PATH).to(device)
 
     np_image = np.array(image_data)
     frame = cv2.cvtColor(np_image, cv2.COLOR_RGB2BGR)
@@ -26,7 +23,7 @@ def process_image_and_generate_recipe(image_data):
 
     if result.prediction is not None:
         for cls in result.prediction.labels:
-            class_name = classNames[int(cls)]
+            class_name = CLASS_NAMES[int(cls)]
             class_final_names.append(class_name)
 
     ingredients_detected = ','.join(np.unique(class_final_names)) if class_final_names else ''

@@ -70,7 +70,7 @@ numpy==1.23.0
 omegaconf==2.3.0
 onnx==1.13.0
 onnxruntime==1.13.1
-onnxsim==0.4.35
+onnxsim==0.4.33
 openai==1.12.0
 opencv-python-headless==4.9.0.80
 oscrypto==1.3.0

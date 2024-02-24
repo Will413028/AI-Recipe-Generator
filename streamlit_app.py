@@ -36,18 +36,17 @@ def process_image_and_generate_recipe(image_data):
             cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 255), 3)
             cv2.putText(frame, label, (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255,255,255), 2)
 
-    if class_final_names:
-        ingredients_detected = ','.join(np.unique(class_final_names))
+    ingredients_detected = ','.join(np.unique(class_final_names)) if class_final_names else ''
     
     return frame, ingredients_detected
 
-def generate_recipe(ingredients):
+def generate_recipe(ingredients, cuisine):
     try:
+        prompt = f"Take these ingredients: {ingredients}. Generate a {cuisine} recipe based on these ingredients."
         response = client.chat.completions.create(model="gpt-3.5-turbo",
                                                   messages=[
-                                                      {"role": "system", "content": "Take these ingredients" + ingredients},
-                                                      {"role": "system", "content": "Generate a Recipe Based on these Ingredients."},
-                                                      {"role": "system", "content": "Please write in Traditional Chinese language."}
+                                                      {"role": "system", "content": prompt},
+                                                      {"role": "user", "content": "Please write in Traditional Chinese language."}
                                                   ])
         result = ''
         for choice in response.choices:
@@ -63,16 +62,21 @@ st.title("蔬食智能食譜")
 
 uploaded_file = st.file_uploader("請上傳一張照片或使用手機拍照", type=["jpg", "jpeg", "png"])
 
+cuisine = st.selectbox("選擇食譜種類", ["台灣料理", "日本料理"])
+
 st.title("您的食譜將在此生成")
 
 if uploaded_file is not None:
     
     image = Image.open(uploaded_file)
     
-    st.image(image, caption="上傳的照片", use_column_width=True)
+    st.image(image, caption="上傳食物照片", use_column_width=True)
 
     processed_image, ingredients_detected = process_image_and_generate_recipe(image)
     processed_image = cv2.cvtColor(processed_image, cv2.COLOR_BGR2RGB)
 
-    article = generate_recipe(ingredients_detected)
-    st.write(article)
+    if ingredients_detected:
+        recipe = generate_recipe(ingredients_detected, cuisine)
+        st.write(recipe)
+    else:
+        st.write("沒有辨識到任何食物，請嘗試其他照片")

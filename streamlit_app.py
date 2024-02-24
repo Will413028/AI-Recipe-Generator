@@ -2,7 +2,6 @@ import cv2
 import torch
 from super_gradients.training import models
 import numpy as np
-import math
 import streamlit as st
 from PIL import Image
 from openai import OpenAI
@@ -26,15 +25,9 @@ def process_image_and_generate_recipe(image_data):
     result = model.predict(frame, conf=0.30)
 
     if result.prediction is not None:
-        for bbox_xyxy, confidence, cls in zip(result.prediction.bboxes_xyxy, result.prediction.confidence, result.prediction.labels):
-            bbox = np.array(bbox_xyxy).astype(int)
+        for cls in result.prediction.labels:
             class_name = classNames[int(cls)]
             class_final_names.append(class_name)
-            conf = math.ceil((confidence*100))/100
-            label = f'{class_name}{conf}'
-            x1, y1, x2, y2 = bbox
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 255), 3)
-            cv2.putText(frame, label, (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255,255,255), 2)
 
     ingredients_detected = ','.join(np.unique(class_final_names)) if class_final_names else ''
     

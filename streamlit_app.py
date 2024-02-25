@@ -47,6 +47,7 @@ def display_image_and_detect_ingredients(uploaded_file, model):
 
 def main():
     st.title("蔬食智能食譜")
+    st.markdown("<p style='font-size: 16px;'>清冰箱的好幫手</p>", unsafe_allow_html=True)
     with st.spinner('模型載入中，請稍候...'):
         model = get_model()
 

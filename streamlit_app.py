@@ -27,6 +27,7 @@ def generate_recipe(ingredients, cuisine):
                 ],
                 temperature=0.5,
                 n=1,
+                max_tokens=400,
             )
             return ''.join([choice.message.content for choice in response.choices])
         except Exception as e:

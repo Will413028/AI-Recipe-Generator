@@ -3,7 +3,7 @@ from PIL import Image
 from openai import OpenAI
 import cv2
 from utils import load_model, process_image
-from config import OPENAI_API_KEY
+from config import OPENAI_API_KEY, CUISINE_OPTIONS
 
 st.set_page_config(page_title="蔬食智能食譜", page_icon="📸")
 client = OpenAI(api_key=OPENAI_API_KEY)
@@ -24,7 +24,10 @@ def generate_recipe(ingredients, cuisine):
                 messages=[
                     {"role": "system", "content": prompt},
                     {"role": "user", "content": "Please write in Traditional Chinese language."}
-                ])
+                ],
+                temperature=0.5,
+                n=1,
+            )
             return ''.join([choice.message.content for choice in response.choices])
         except Exception as e:
             st.error(f"生成食譜時發生錯誤: {e}")
@@ -48,12 +51,15 @@ def main():
         model = get_model()
 
     uploaded_file = st.file_uploader("請上傳一張照片或使用手機拍照", type=["jpg", "jpeg", "png"])
-    cuisine = st.selectbox("選擇料理種類", ["台灣料理", "日本料理"])
+
+    selected_cuisine = st.selectbox("選擇料理種類", list(CUISINE_OPTIONS.keys()))
+
+    cuisine_in_english = CUISINE_OPTIONS[selected_cuisine]
 
     if uploaded_file:
         ingredients_detected = display_image_and_detect_ingredients(uploaded_file, model)
         if ingredients_detected:
-            recipe = generate_recipe(ingredients_detected, cuisine)
+            recipe = generate_recipe(ingredients_detected, cuisine_in_english)
             st.write(recipe)
         else:
             st.write("沒有辨識到任何食物，請嘗試其他照片")
